@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고양이 나이 계산기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#15B8A6',
+                        secondary: '#F59E0B'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body { background-color: #fafafa; }
+    </style>
+</head>
+<body class="w-[375px] min-h-[762px] mx-auto bg-white">
+    <header class="fixed top-0 w-[375px] bg-white z-50">
+        <h1 class="text-2xl font-medium text-center py-4 text-primary">고양이 나이 계산기</h1>
+    </header>
+
+    <main class="pt-16 pb-20 px-4">
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-4">
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-medium mb-2">고양이 품종</label>
+                <div class="relative">
+                    <select id="catBreed" class="w-full p-3 bg-gray-50 border border-gray-200 rounded text-gray-700 appearance-none">
+                        <option value="">품종을 선택하세요</option>
+                        <option value="persian">페르시안</option>
+                        <option value="siamese">시암</option>
+                        <option value="russianblue">러시안블루</option>
+                        <option value="bengal">벵갈</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <i class="ri-arrow-down-s-line text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-medium mb-2">고양이 나이 (년)</label>
+                <input type="number" id="catAge" class="w-full p-3 bg-gray-50 border border-gray-200 rounded text-gray-700" placeholder="나이를 입력하세요">
+            </div>
+
+            <button onclick="calculateAge()" class="w-full bg-primary text-white py-3 rounded-button font-medium hover:bg-opacity-90 transition-colors">
+                계산하기
+            </button>
+        </div>
+
+        <div class="flex gap-4 mb-4">
+            <button class="flex-1 bg-[#FFE600] py-3 rounded-button font-medium hover:bg-opacity-90 transition-colors">
+                카카오톡 공유
+            </button>
+            <button class="flex-1 bg-[#1877F2] text-white py-3 rounded-button font-medium hover:bg-opacity-90 transition-colors">
+                페이스북 공유
+            </button>
+        </div>
+
+        <div class="bg-gradient-to-r from-pink-400 to-purple-500 p-4 rounded-lg text-white">
+            <div class="text-center mb-2">우리집 고양이 친구전 만들기</div>
+            <div class="flex items-center justify-center gap-2">
+                프로젝트 바로가기 <i class="ri-arrow-right-line"></i>
+            </div>
+        </div>
+
+        <div id="resultCard" class="hidden mt-6 bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-medium mb-4">계산 결과</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">사람 나이</span>
+                    <span id="humanAge" class="text-primary font-medium">0세</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">예상 수명</span>
+                    <span id="lifeExpectancy" class="text-primary font-medium">0년</span>
+                </div>
+                <div id="healthTips" class="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const catData = {
+            "persian": {
+                lifespan: "12-17",
+                ageRate: 4.8,
+                healthNote: "눈물자국과 호흡기 질환에 주의가 필요합니다. 정기적인 그루밍과 건강검진이 필수적입니다."
+            },
+            "siamese": {
+                lifespan: "15-20",
+                ageRate: 4.5,
+                healthNote: "치아 관리와 정기적인 운동이 중요합니다. 사회성이 높아 충분한 관심이 필요합니다."
+            },
+            "russianblue": {
+                lifespan: "15-20",
+                ageRate: 4.5,
+                healthNote: "비교적 건강한 품종이지만, 균형 잡힌 식단 관리가 중요합니다."
+            },
+            "bengal": {
+                lifespan: "12-16",
+                ageRate: 4.6,
+                healthNote: "활동량이 많아 충분한 운동이 필요하며, 심장질환에 주의가 필요합니다."
+            }
+        };
+
+        function calculateAge() {
+            const breed = document.getElementById('catBreed').value;
+            const age = parseInt(document.getElementById('catAge').value);
+            
+            if (!breed || !age) {
+                showToast('품종과 나이를 입력해주세요');
+                return;
+            }
+
+            const breedData = catData[breed];
+            const humanAge = Math.round(age * breedData.ageRate * 4);
+            
+            document.getElementById('resultCard').classList.remove('hidden');
+            document.getElementById('humanAge').textContent = `${humanAge}세`;
+            document.getElementById('lifeExpectancy').textContent = breedData.lifespan + '년';
+            document.getElementById('healthTips').textContent = breedData.healthNote;
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
